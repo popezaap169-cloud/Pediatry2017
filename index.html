@@ -1,63 +1,427 @@
 <!DOCTYPE html>
-      }
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USMLE Pediatrics MCQs</title>
 
-      if (
-        index === selectedAnswers[currentQuestion] &&
-        index !== q.answer
-      ) {
-        btn.classList.add('wrong');
-      }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
 
-      btn.disabled = true;
+body{
+    background:#0f172a;
+    color:white;
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:280px;
+    background:#111827;
+    padding:20px;
+    overflow-y:auto;
+    border-right:1px solid #1e293b;
+}
+
+.sidebar h1{
+    font-size:22px;
+    margin-bottom:20px;
+    color:#38bdf8;
+}
+
+.score{
+    background:#1e293b;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:20px;
+    text-align:center;
+    font-size:18px;
+}
+
+.nav-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+}
+
+.nav-btn{
+    height:42px;
+    border:none;
+    border-radius:10px;
+    background:#1e293b;
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.nav-btn.active{
+    background:#0ea5e9;
+}
+
+.nav-btn.correct{
+    background:#16a34a;
+}
+
+.nav-btn.wrong{
+    background:#dc2626;
+}
+
+.main{
+    flex:1;
+    padding:40px;
+}
+
+.card{
+    background:#111827;
+    padding:35px;
+    border-radius:20px;
+    max-width:1000px;
+    margin:auto;
+}
+
+.q-number{
+    color:#38bdf8;
+    margin-bottom:20px;
+    font-weight:bold;
+}
+
+.question{
+    font-size:22px;
+    line-height:1.6;
+    margin-bottom:30px;
+}
+
+.option{
+    width:100%;
+    border:none;
+    background:#1e293b;
+    color:white;
+    padding:18px;
+    margin-bottom:15px;
+    border-radius:12px;
+    text-align:left;
+    cursor:pointer;
+    font-size:16px;
+    transition:0.2s;
+}
+
+.option:hover{
+    transform:translateY(-2px);
+}
+
+.option.correct{
+    background:#166534;
+}
+
+.option.wrong{
+    background:#991b1b;
+}
+
+.explanation{
+    margin-top:30px;
+    padding:20px;
+    background:#1e293b;
+    border-radius:12px;
+    line-height:1.7;
+    display:none;
+}
+
+.controls{
+    display:flex;
+    justify-content:space-between;
+    margin-top:30px;
+}
+
+.btn{
+    padding:14px 24px;
+    border:none;
+    border-radius:12px;
+    background:#0ea5e9;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+}
+
+.btn:hover{
+    opacity:0.9;
+}
+
+@media(max-width:900px){
+    body{
+        flex-direction:column;
     }
 
-    btn.onclick = () => checkAnswer(index);
+    .sidebar{
+        width:100%;
+    }
 
-    optionsContainer.appendChild(btn);
-  });
+    .main{
+        padding:20px;
+    }
+}
+</style>
+</head>
 
-  if (answered[currentQuestion]) {
-    explanation.style.display = 'block';
-    explanation.innerHTML = `<strong>Explanation:</strong><br><br>${q.explanation}`;
-  }
+<body>
 
-  buildNavigation();
+<div class="sidebar">
+    <h1>USMLE Pediatrics</h1>
+
+    <div class="score">
+        Score:
+        <span id="score">0</span> /
+        <span id="total">0</span>
+    </div>
+
+    <div class="nav-grid" id="navGrid"></div>
+</div>
+
+<div class="main">
+    <div class="card">
+
+        <div class="q-number" id="qNumber"></div>
+
+        <div class="question" id="question"></div>
+
+        <div id="options"></div>
+
+        <div class="explanation" id="explanation"></div>
+
+        <div class="controls">
+            <button class="btn" onclick="prevQuestion()">
+                Previous
+            </button>
+
+            <button class="btn" onclick="nextQuestion()">
+                Next
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+const questions = [
+
+{
+    question: "A 7-year-old boy with X-linked agammaglobulinemia develops infectious arthritis. Which organism is most likely responsible?",
+    options: [
+        "Aspergillus",
+        "Mycoplasma",
+        "Herpes",
+        "Mycobacteria",
+        "Toxoplasma"
+    ],
+    answer: 1,
+    explanation: "Patients with Bruton's agammaglobulinemia are especially susceptible to Mycoplasma infections causing septic arthritis."
+},
+
+{
+    question: "A neonate with Down syndrome has abdominal distension, delayed meconium passage, and explosive stool after rectal examination. What is the mechanism?",
+    options: [
+        "Decreased thyroxine",
+        "Maternal epidural exposure",
+        "Failure of neural crest migration",
+        "Intussusception",
+        "Meconium obstruction"
+    ],
+    answer: 2,
+    explanation: "Hirschsprung disease results from failed neural crest migration leading to absent ganglion cells."
+},
+
+{
+    question: "Which animal exposure always requires rabies prophylaxis?",
+    options: [
+        "Rabbit",
+        "Rat",
+        "Bat",
+        "Chipmunk",
+        "Squirrel"
+    ],
+    answer: 2,
+    explanation: "Any direct contact with bats requires rabies prophylaxis because bites may go unnoticed."
+},
+
+{
+    question: "A child with cystic fibrosis develops steatorrhea and failure to thrive. What causes the GI symptoms?",
+    options: [
+        "Colonic inertia",
+        "Bacterial overgrowth",
+        "Gastric hypersecretion",
+        "Pancreatic exocrine insufficiency",
+        "Achlorhydria"
+    ],
+    answer: 3,
+    explanation: "Pancreatic duct obstruction causes decreased delivery of digestive enzymes."
+},
+
+{
+    question: "A 4-month-old infant can laugh, follow objects past midline, and lift head to 90 degrees. What is the age?",
+    options: [
+        "2 months",
+        "4 months",
+        "6 months",
+        "12 months",
+        "18 months"
+    ],
+    answer: 1,
+    explanation: "These are classic developmental milestones of a 4-month-old infant."
 }
 
-function checkAnswer(index) {
-  if (answered[currentQuestion]) return;
+];
 
-  answered[currentQuestion] = true;
-  selectedAnswers[currentQuestion] = index;
+let currentQuestion = 0;
+let score = 0;
 
-  if (index === questions[currentQuestion].answer) {
-    score++;
-    scoreDisplay.innerText = score;
-  }
+const answered = Array(questions.length).fill(false);
+const selected = Array(questions.length).fill(null);
 
-  renderQuestion();
+document.getElementById("total").textContent = questions.length;
+
+function renderNav(){
+
+    const nav = document.getElementById("navGrid");
+    nav.innerHTML = "";
+
+    questions.forEach((q,index)=>{
+
+        const btn = document.createElement("button");
+
+        btn.className = "nav-btn";
+
+        if(index === currentQuestion){
+            btn.classList.add("active");
+        }
+
+        if(answered[index]){
+            if(selected[index] === questions[index].answer){
+                btn.classList.add("correct");
+            }else{
+                btn.classList.add("wrong");
+            }
+        }
+
+        btn.textContent = index + 1;
+
+        btn.onclick = ()=>{
+            currentQuestion = index;
+            renderQuestion();
+        };
+
+        nav.appendChild(btn);
+    });
 }
 
-function nextQuestion() {
-  if (currentQuestion < questions.length - 1) {
-    currentQuestion++;
+function renderQuestion(){
+
+    const q = questions[currentQuestion];
+
+    document.getElementById("qNumber").textContent =
+        `Question ${currentQuestion + 1}`;
+
+    document.getElementById("question").textContent =
+        q.question;
+
+    const optionsDiv = document.getElementById("options");
+
+    optionsDiv.innerHTML = "";
+
+    q.options.forEach((opt,index)=>{
+
+        const btn = document.createElement("button");
+
+        btn.className = "option";
+
+        btn.textContent = opt;
+
+        if(answered[currentQuestion]){
+
+            btn.disabled = true;
+
+            if(index === q.answer){
+                btn.classList.add("correct");
+            }
+
+            if(index === selected[currentQuestion] &&
+               index !== q.answer){
+                btn.classList.add("wrong");
+            }
+        }
+
+        btn.onclick = ()=>{
+            selectAnswer(index);
+        };
+
+        optionsDiv.appendChild(btn);
+    });
+
+    const explanation = document.getElementById("explanation");
+
+    if(answered[currentQuestion]){
+        explanation.style.display = "block";
+        explanation.innerHTML =
+            "<strong>Explanation:</strong><br><br>" +
+            q.explanation;
+    }else{
+        explanation.style.display = "none";
+    }
+
+    renderNav();
+}
+
+function selectAnswer(index){
+
+    if(answered[currentQuestion]) return;
+
+    answered[currentQuestion] = true;
+
+    selected[currentQuestion] = index;
+
+    if(index === questions[currentQuestion].answer){
+        score++;
+    }
+
+    document.getElementById("score").textContent = score;
+
     renderQuestion();
-  }
 }
 
-function prevQuestion() {
-  if (currentQuestion > 0) {
-    currentQuestion--;
-    renderQuestion();
-  }
+function nextQuestion(){
+
+    if(currentQuestion < questions.length - 1){
+        currentQuestion++;
+        renderQuestion();
+    }
 }
 
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight') nextQuestion();
-  if (e.key === 'ArrowLeft') prevQuestion();
+function prevQuestion(){
+
+    if(currentQuestion > 0){
+        currentQuestion--;
+        renderQuestion();
+    }
+}
+
+document.addEventListener("keydown",(e)=>{
+
+    if(e.key === "ArrowRight"){
+        nextQuestion();
+    }
+
+    if(e.key === "ArrowLeft"){
+        prevQuestion();
+    }
 });
 
 renderQuestion();
+
 </script>
 
 </body>
